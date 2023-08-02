@@ -1,3 +1,4 @@
+global using BlazorCRUD.Shared.Models;
 using Microsoft.AspNetCore.ResponseCompression;
 
 var builder = WebApplication.CreateBuilder(args);
