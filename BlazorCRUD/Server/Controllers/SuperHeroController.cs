@@ -30,16 +30,7 @@ namespace BlazorCRUD.Server.Controllers
             return Ok(heroes);
         }
 
-        //[HttpGet]
-        //public async Task<ActionResult<List<SuperHero>>> GetSuperHeroes(int id)
-        //{
-        //    var heroes =await  _dbContext.SuperHeroes.ToListAsync();
-        //    return Ok(heroes);
-        //}
-
-
-        //[HttpGet]
-        //[Route("{id}")]
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<SuperHero>> GetSingleHero(int id)
         {
