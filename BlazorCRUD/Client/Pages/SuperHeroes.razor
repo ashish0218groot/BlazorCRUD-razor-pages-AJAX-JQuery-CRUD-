@@ -36,6 +36,8 @@
     </tbody>
 </table>
 
+<button class="btn btn-primary" @onclick="CreateNewHero">Create</button>
+
 
 @code {
     //using lifecycle methods
@@ -47,6 +49,11 @@
     void ShowHero(int id)
     {
         NavigationManager.NavigateTo($"hero/{id}");
+    }
+
+    void CreateNewHero()
+    {
+        NavigationManager.NavigateTo("/hero");
     }
 
 }
