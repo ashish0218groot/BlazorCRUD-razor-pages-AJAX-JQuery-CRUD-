@@ -1,9 +1,26 @@
 ﻿@page "/"
+@inject  IJSRuntime JavaScript
+
+<button class="btn btn-primary" @onclick=@HandleClick>Say Hello</button>
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+@code {
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    private async void HandleClick()
+    {
+        var message = await GetGreeting("Ashish");
+        Alert(message);
+    }
+
+    private void Alert(string message)
+    {
+        JavaScript.InvokeVoidAsync("alert", message);
+    }
+
+    private ValueTask <string> GetGreeting(string name)
+    {
+        return JavaScript.InvokeAsync<string>("getGreeting", name);
+    }
+}
