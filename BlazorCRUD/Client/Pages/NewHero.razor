@@ -1,0 +1,120 @@
+﻿@page "/newHero"
+@page "/newHero/{id:int}"
+@using BlazorCRUD.Shared.Models
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+
+@if (Id == null)
+{
+    <PageTitle>
+        Create a new Super Hero
+    </PageTitle>
+    <h3>Create a New Super Hero</h3>
+}
+else
+{
+    <PageTitle>
+        Edit @hero.HeroName
+    </PageTitle>
+    <h3>Edit @hero.HeroName</h3>
+}
+
+<EditForm Model="hero" OnValidSubmit="HandleSubmit">
+    <div>
+        <label for="firstname">First Name</label>
+        <InputText id="firstname" @bind-Value="hero.FirstName" class="form-control"></InputText>
+    </div>
+    <div>
+        <label for="lastname">Last Name</label>
+        <InputText id="lastname" @bind-Value="hero.LastName" class="form-control"></InputText>
+    </div>
+    <div>
+        <label for="heroname">Hero Name</label>
+        <InputText id="heroname" @bind-Value="hero.HeroName" class="form-control"></InputText>
+    </div>
+    <div>
+        <label>Comic</label><br />
+        <InputSelect @bind-Value="hero.ComicId" class="form-select">
+            @foreach (var comic in comics)
+            {
+                <option value="@comic.Id">@comic.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">@btnText</button>
+    <button type="button" class="btn btn-danger" @onclick="DeleteHero">Delete</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private SuperHero hero = new SuperHero { Comic = new Comic() };
+    private string btnText = string.Empty;
+    private List<Comic> comics = new List<Comic>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadComics();
+
+        if (Id != null)
+        {
+            await LoadHero();
+        }
+        else
+        {
+            hero.Comic = comics.FirstOrDefault();
+            hero.ComicId = hero.Comic.Id;
+        }
+    }
+
+    async Task LoadComics()
+    {
+        // Call the SuperHeroesServiceInterop to get all comics
+        await JSRuntime.InvokeVoidAsync("SuperHeroesServiceInterop.getAllComics", DotNetObjectReference.Create(this));
+    }
+
+    async Task LoadHero()
+    {
+        // Call the SuperHeroesServiceInterop to get a single superhero by ID
+        await JSRuntime.InvokeVoidAsync("SuperHeroesServiceInterop.getSingleSuperHero", Id, DotNetObjectReference.Create(this));
+    }
+
+    [JSInvokable]
+    public void SetComics(List<Comic> data)
+    {
+        comics = data;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void SetHero(SuperHero data)
+    {
+        hero = data;
+        btnText = "Update Hero";
+        StateHasChanged();
+    }
+
+    async Task HandleSubmit()
+    {
+        if (Id == null)
+        {
+            // Call the SuperHeroesServiceInterop to create a new superhero
+            await JSRuntime.InvokeVoidAsync("SuperHeroesServiceInterop.createSuperHero", hero, DotNetObjectReference.Create(this));
+        }
+        else
+        {
+            // Call the SuperHeroesServiceInterop to update a superhero
+            await JSRuntime.InvokeVoidAsync("SuperHeroesServiceInterop.updateSuperHero", hero, DotNetObjectReference.Create(this));
+        }
+    }
+
+    async Task DeleteHero()
+    {
+        // Call the SuperHeroesServiceInterop to delete a superhero
+        await JSRuntime.InvokeVoidAsync("SuperHeroesServiceInterop.deleteSuperHero", hero.Id, DotNetObjectReference.Create(this));
+        NavigationManager.NavigateTo("/superHeroList");
+    }
+}

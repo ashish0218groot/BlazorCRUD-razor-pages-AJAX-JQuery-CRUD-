@@ -1,0 +1,74 @@
+﻿@page "/superHeroList"
+@using BlazorCRUD.Shared.Models
+@inject IJSRuntime JSRuntime
+
+<PageTitle>
+    Super Heroes List
+</PageTitle>
+
+<h3>SuperHeroes List</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Hero Name</th>
+            <th>Comic</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var hero in superheroes)
+        {
+            <tr>
+                <td>@hero.FirstName</td>
+                <td>@hero.LastName</td>
+                <td>@hero.HeroName</td>
+                <td>@hero.Comic.Name</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="()=>ShowHero(hero.Id)">
+                        <i class="oi oi-pencil"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-primary" @onclick="CreateNewHero">Create</button>
+
+@code {
+    private List<SuperHero> superheroes = new List<SuperHero>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSuperHeroes();
+    }
+
+    async Task LoadSuperHeroes()
+    {
+
+       var lst = await JSRuntime.InvokeAsync<List<SuperHero>>("SuperHeroesServiceInterop.getAllSuperHeroes", DotNetObjectReference.Create(this));
+        this.superheroes = lst;
+
+    }
+
+    [JSInvokable]
+    public void SetSuperHeroes(List<SuperHero> data)
+    {
+        superheroes = data;
+        StateHasChanged();
+    }
+
+    void ShowHero(int id)
+    {
+
+         JSRuntime.InvokeVoidAsync("SuperHeroesServiceInterop.navigateToHero", id);
+    }
+
+    void CreateNewHero()
+    {
+         JSRuntime.InvokeVoidAsync("SuperHeroesServiceInterop.navigateToHero", null);
+    }
+}
